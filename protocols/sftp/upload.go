@@ -71,7 +71,7 @@ func uploadFile(conn *ssh.Client, localFile files.FileData, destinationFilename 
 }
 
 func PushChanges(conn *ssh.Client, sftpConfig clientConfig.Configuration) error {
-	fs, err := files.New()
+	fs, err := files.CreateAndStoreFileList()
 	if err != nil {
 		return err
 	}

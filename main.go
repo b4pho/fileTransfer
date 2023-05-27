@@ -3,7 +3,8 @@ package main
 import (
 	"fileTransfer/configuration"
 	files "fileTransfer/filesystem"
-	"fileTransfer/sftp"
+	"fileTransfer/protocols"
+
 	"fileTransfer/terminal"
 	"flag"
 	"fmt"
@@ -19,26 +20,28 @@ func main() {
 }
 
 func Init(cmd *flag.FlagSet, args []string) {
-	configHostname := cmd.String("host", "localhost", "SFTP host")
-	configPort := cmd.Int("port", 22, "SFTP port")
-	configUsername := cmd.String("user", "test", "SFTP username")
-	configMaxConnections := cmd.Int("max-connections", 3, "SFTP number of max concurrent connections")
-	configServerFolder := cmd.String("folder", ".", "SFTP folder on sftp server")
+	hostname := cmd.String("host", "localhost", "server host")
+	port := cmd.Int("port", 22, "server port")
+	username := cmd.String("user", "test", "server username")
+	maxConnections := cmd.Int("max-connections", 3, "server number of max concurrent connections")
+	serverFolder := cmd.String("folder", ".", "folder on server")
+	protocol := cmd.String("protocol", "SFTP", "Protocols available: SFTP, FTP, FTPS-IMPLICIT, FTPS-EXPLICIT")
+
 	cmd.Parse(args)
 	config := configuration.New()
-	config.Hostname = *configHostname
-	config.Port = *configPort
-	config.Username = *configUsername
-	config.MaxConnections = *configMaxConnections
-	config.ServerFolder = *configServerFolder
+	config.Hostname = *hostname
+	config.Port = *port
+	config.Username = *username
+	config.MaxConnections = *maxConnections
+	config.ServerFolder = *serverFolder
+	config.Protocol = *protocol
 	err := config.Store()
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Configuration stored")
 
-	// create and store local and simplified rappresentation of the "filesystem"
-	_, err = files.New()
+	_, err = files.CreateAndStoreFileList()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,12 +54,12 @@ func Publish(cmd *flag.FlagSet, args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	conn, err := sftp.Connect(*config, password)
+	conn, err := protocols.Connect(*config, password)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	err = sftp.PushChanges(conn, *config)
+	err = protocols.PushChanges(conn, *config)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,12 +72,12 @@ func Clone(cmd *flag.FlagSet, args []string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	conn, err := sftp.Connect(*config, password)
+	conn, err := protocols.Connect(*config, password)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	err = sftp.Clone(conn, *config)
+	err = protocols.Clone(conn, *config)
 	if err != nil {
 		log.Fatal(err)
 	}

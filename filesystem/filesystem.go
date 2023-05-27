@@ -18,7 +18,7 @@ type FileData struct {
 	IsDeleted    bool      `yaml:"deleted"`
 }
 
-const fileSystemFilename = ".sftp.files"
+const fileSystemFilename = ".fileTransfer.files"
 
 var ignoredFiles []string = []string{configuration.Filename, fileSystemFilename}
 
@@ -35,7 +35,7 @@ func shouldIgnoreFile(filename string) bool {
 
 type Filesystem map[string]FileData
 
-func New() (Filesystem, error) {
+func CreateAndStoreFileList() (Filesystem, error) {
 	directoryPath := "." // Always check files in current directory
 	newfs := Filesystem{}
 	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {

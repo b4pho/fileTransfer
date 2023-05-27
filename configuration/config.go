@@ -14,9 +14,11 @@ type Configuration struct {
 	Username       string `yaml:"user"`
 	MaxConnections int    `yaml:"max-concurrent-connections"`
 	ServerFolder   string `yaml:"server-folder"`
+	Protocol       string `yaml:"protocol"`
+	DebugMode      bool   `yaml:"debug-mode"`
 }
 
-const Filename = ".sftp.config.yaml"
+const Filename = ".fileTransfer.config.yaml"
 
 func Read() (*Configuration, error) {
 	content, err := os.ReadFile(Filename)
@@ -40,7 +42,7 @@ func currentTime() string {
 }
 
 func New() Configuration {
-	return Configuration{epochTime(), "localhost", 22, "test", 3, "."}
+	return Configuration{epochTime(), "localhost", 22, "test", 3, ".", "sftp", false}
 }
 
 func (c *Configuration) UpdateTime() {
